@@ -1,0 +1,19 @@
+.navbar-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.signout {
+    padding: 1rem;
+    font-size: 1.5rem;
+    text-decoration: underline;
+    opacity: 1;
+    transition: opacity 0.15s ease-in;
+}
+
+.signout:hover,
+.signout:focus {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s ease-in;
+}
