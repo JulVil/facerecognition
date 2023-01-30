@@ -1,0 +1,26 @@
+.result-container{
+    display: flex;
+    justify-content: center;
+    margin: 0;
+}
+
+.image-container{
+    position: absolute;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+}
+
+.image-container img {
+    width: 500px;
+    height: auto;
+}
+
+.bounding-box {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: absolute;
+    cursor: pointer;
+    box-shadow: 0 0 0 3px #149df2 inset;
+    z-index: 5;
+}
