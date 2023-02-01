@@ -11,8 +11,8 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background: linear-gradient(to left, #0f0c29, #302b63, #24243e);
-    border: 1px solid #000;
+    background: linear-gradient(to left, #2a5470, #2c5175, #334d78, #3f4779, #4c4177);
+    border: 1px solid #00000096;
     border-radius: 15px;
     box-shadow: 0px 0px 8px 2px rgba(255, 255, 255, 0.2);
 }

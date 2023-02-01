@@ -35,7 +35,7 @@
     width: 30%;
     font-size: 1.25rem;
     color: #f0ead6;
-    background-color: #302b63;
+    background-color: #31346f;
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 10px;
@@ -44,7 +44,7 @@
 
 .detect-button:hover {
     cursor: pointer;
-    background-color: #5d54ba;
+    background-color: #008fb3;
     transform: scale(1.2);
 }
 

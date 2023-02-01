@@ -9,7 +9,12 @@ const ImageInput = ({ onInputChange, onButtonSubmit }) => {
       </p>
       <div className='interactives-container'>
         <div className='background-container'>
-          <input className='url-input' type='text' placeholder='Copy an image URL...' onChange={onInputChange}/>
+          <input 
+            className='url-input' 
+            type='text' 
+            placeholder='Copy an image URL...' 
+            onChange={onInputChange}
+            required/>
           <button className='detect-button' onClick={onButtonSubmit}>Detect</button>
         </div>
       </div>
