@@ -2,14 +2,22 @@ import { useState } from 'react';
 import ParticlesBg from 'particles-bg';
 import Navbar from './components/Navbar/Navbar';
 import Signin from './components/Signin/Signin';
+import Register from './components/Register/Register';
 import Logo from './components/Logo/Logo';
 import Rank from './components/Rank/Rank';
 import ImageInput from './components/ImageInput/ImageInput';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import './App.css';
-import Register from './Register/Register';
 
-//api stuff here
+//api stuff
+
+let USER = {
+  id:'',
+  name: '',
+  email: '',
+  entries: 0,
+  joined: ''
+}
 
 function App() {
 
@@ -18,13 +26,25 @@ function App() {
   const [boxes, setBoxes] = useState([]);
   const [route, setRoute] = useState('signin');
   const [isSignedIn, setisSignedIn] = useState(false);
+  const [user, setUser] = useState(USER);
+  
+  const loadUser = (userData) => {
+    setUser({
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      entries: userData.entries,
+      joined: userData.joined
+    })
+  }
 
   const onInputChange = (event) => {
     setInput(event.target.value);
   }
 
-  const onButtonSubmit = () => {
+  const onImageSubmit = () => {
     setImageUrl(input);
+    setInput('');
 
     const raw = JSON.stringify({
       "user_app_id": {
@@ -54,13 +74,21 @@ function App() {
     fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
     .then((response) => response.text())
     .then((result) => {
-      const { outputs } = JSON.parse(result); //converts the response text to destructure object so we can use the bounding box
-      // const { regions } = outputs[0].data;
-      // const { concepts } = regions[0].data;
-      // const { value } = concepts[0];
-      // const { bounding_box } = regions[0].region_info;
+      const { outputs } = JSON.parse(result);
+      if(result){
+        fetch('http://localhost:3001/image', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id: user.id
+          })
+        })
+        .then(response => response.json())
+        .then(count => {
+          setUser(user => ({...user, entries:count}))
+        })
+      }
       displayFaceBox(calculateFaceLocation(outputs));
-      // console.log(outputs);
     })
     .catch((error) => alert('no face', error));
         
@@ -69,16 +97,9 @@ function App() {
   const calculateFaceLocation = (outputsData) => {
     const image = document.getElementById('inputImage');
     
-    console.log('data object', outputsData);
     const { regions } = outputsData[0].data; //can map the regions array of objects to show multiple boxes for faces
-    // console.log('postion array', regions) 
-    
     const verticesValues = regions.map(obj => obj.region_info.bounding_box); //values for box multiple faces
-    console.log('multiple faces array', verticesValues); 
-    
-    // const clarifaiFaceBox = regions[0].region_info.bounding_box;
-    // console.log('box data', clarifaiFaceBox);
-    
+
     const width = Number(image.width);
     const height = Number(image.height);
     
@@ -91,17 +112,9 @@ function App() {
     }));
 
     return valuesForPosition;
-    
-    // return {
-    //   leftCol: clarifaiFaceBox.left_col * width,
-    //   topRow: clarifaiFaceBox.top_row * height,
-    //   rightCol: width - (clarifaiFaceBox.right_col * width),
-    //   bottomRow: height - (clarifaiFaceBox.bottom_row * height)
-    // }
   }
   
   const displayFaceBox = (boxNumber) => {
-    // console.log('numbers after math', boxNumber);
     setBoxes(boxNumber);
   }
 
@@ -121,16 +134,16 @@ function App() {
       {route === 'home' 
       ? <>
           <Logo/>
-          <Rank/>
-          <ImageInput 
+          <Rank name={user.name} entries={user.entries}/>
+          <ImageInput
           onInputChange={onInputChange}
-          onButtonSubmit={onButtonSubmit}/>
+          onImageSubmit={onImageSubmit}/>
           <FaceRecognition imageUrl={imageUrl} boxes={boxes}/>
       </>
       : (
         route === 'signin'
-        ? <Signin onRouteChange={onRouteChange}/>
-        : <Register onRouteChange={onRouteChange}/>
+        ? <Signin loadUser={loadUser} onRouteChange={onRouteChange}/>
+        : <Register loadUser={loadUser} onRouteChange={onRouteChange}/>
       )
       
       }

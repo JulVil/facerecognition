@@ -1,12 +1,12 @@
 import React from 'react';
 import './ImageInput.css';
 
-const ImageInput = ({ onInputChange, onButtonSubmit }) => {
+const ImageInput = ({ onInputChange, onImageSubmit }) => {
   return (
     <div>
-      <p style={{fontSize: 24, margin: 0, marginBottom: 10}}>
-        {'This Smart Brain will detect faces in your pictures. Give it a try.'}
-      </p>
+      <h2 className='description'>
+      This Smart Brain will detect faces in your pictures. Give it a try.
+      </h2>
       <div className='interactives-container'>
         <div className='background-container'>
           <input 
@@ -15,7 +15,7 @@ const ImageInput = ({ onInputChange, onButtonSubmit }) => {
             placeholder='Copy an image URL...' 
             onChange={onInputChange}
             required/>
-          <button className='detect-button' onClick={onButtonSubmit}>Detect</button>
+          <button className='detect-button' onClick={onImageSubmit}>Detect</button>
         </div>
       </div>
     </div>

@@ -1,3 +1,8 @@
+.description {
+    font-size: 40;
+    margin-bottom: 10;
+}
+
 .interactives-container {
     display: flex;
     justify-content: center;
