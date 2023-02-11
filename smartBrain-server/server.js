@@ -1,98 +1,113 @@
 const express = require('express');
-// const bcrypt = require('bcrypt');
-// const saltRounds = 10;
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const cors = require('cors');
+const knex = require('knex');
+const { response } = require('express');
+
+const postgresDB = knex({
+    client: 'pg',
+    connection: {
+      host : '127.0.0.1',
+      port : 5432,
+      user : '',
+      password : '',
+      database : ''
+    }
+  });
+
+postgresDB.select('*').from('users').then(data => {
+    console.log(data);
+});
 
 const app = express();
 
 app.use(express.json()); //middleware to parse the body response to json
 app.use(cors());
 
-const database = {
-    users:[{
-        id:'123',
-        name: 'John',
-        email: 'john@gmail.com',
-        password: 'cookies',
-        entries: 0,
-        joined: new Date()
-    },
-    {
-        id:'124',
-        name: 'Sally',
-        email: 'sally@gmail.com',
-        password: 'bananas',
-        entries: 0,
-        joined: new Date()
-    }
-    ]
-}
-
 app.get('/', (req, res) => {
-    res.send(database.users);
+   
 });
 
-//checks email and password at the signin url, compares it to the database (for naw variable)
+//checks email and password at the signin url, compares it to the database
 app.post('/signin', (req, res) => {
-    // bcrypt.compare("apples", '$2b$10$q5H5DfhUu8iIAm8p7HSKEOe9kxXeWkzuQq9A8jJJZcGkkWSxa8nZi', function(err, result) {
-    //     console.log('first guess', result);
-    // });
-    // bcrypt.compare("veggies", '$2b$10$q5H5DfhUu8iIAm8p7HSKEOe9kxXeWkzuQq9A8jJJZcGkkWSxa8nZi', function(err, result) {
-    //     console.log('second guess', result);
-    // });
-    if(req.body.email === database.users[0].email && 
-       req.body.password === database.users[0].password)
-        res.json(database.users[0]);
-    else
-        res.status(400).json('error loggin in');
+    postgresDB.select('email', 'hash').from('login')
+        .where('email', '=', req.body.email)
+            .then(data => {
+                bcrypt.compare(req.body.password, data[0].hash, function(err, result) {
+                    if(result){
+                        return postgresDB.select('*').from('users')
+                            .where('email', '=', req.body.email)
+                            .then(user => {
+                                res.json(user[0])
+                            })
+                            .catch(err => res.status(400).json('unable to get user'))
+                    } else
+                        res.status(400).json('wrong credentials')
+                });
+            })
+            .catch(err => res.status(400).json('wrong credentials'))
 });
 
-//saves the new information to the database (for now it's lost when server restarts)
+//saves the new information to the database
 app.post('/register', (req, res) => {
     const { name, email, password} = req.body;
 
-    // bcrypt.hash(password, saltRounds, function(err, hash) {
-    //     console.log(hash);
-    // });
-
-    database.users.push({
-        id:'125',
-        name: name,
-        email: email,
-        entries: 0,
-        joined: new Date()
-    })
-
-    res.json(database.users[database.users.length-1]); //response with the user information
+    //create a hash with the password given
+    bcrypt.hash(password, saltRounds, function(err, hash) {
+        //use transaction to insert hash into login table with email(primary key in this table)
+        //then insert name, date and email(foreing key to relate to login table) into users 
+        postgresDB.transaction(trx => {
+            trx.insert({
+                hash: hash,
+                email: email
+            })
+            .into('login')
+            .returning('email')
+            .then(loginEmail => {
+                return trx('users')
+                    .returning('*')
+                    .insert({
+                        email: loginEmail[0].email,
+                        name: name,
+                        joined: new Date()
+                    })
+                    .then(user => {
+                        res.json(user[0]); //response with the user information
+                    })
+                .then(trx.commit)//if everything above goes well, save all into tables
+                .catch(trx.rollback)//if there is an error, keep the database as before changes
+            })
+            .catch(err => res.status(400).json('unable to register'))
+        })
+    });
 });
 
 //shows the profile of the user, based on the id
 app.get('/profile/:id', (req, res) => {
     const { id } = req.params;
-    let found = false;
-    database.users.forEach(user => {
-        if(user.id === id){
-            found = true;
-            return res.json(user);
-        }
+
+    postgresDB.select('*').from('users').where({id})
+    .then(user => {
+        if(user.length)
+            res.json(user[0])
+        else
+            res.status(400).json('not found')
     })
-    if(!found)
-        res.status(404).json('not such user')
+    .catch(err => res.status(400).json('error getting user'))
 });
 
 //when an image url is used, it sums it to the user entries counter, using the user id to know who it is 
 app.put('/image', (req, res) => {
     const { id } = req.body;
-    let found = false;
-    database.users.forEach(user => {
-        if(user.id === id){
-            found = true;
-            user.entries++;
-            return res.json(user.entries);
-        }
-    })
-    if(!found)
-        res.status(400).json('not such user')
+
+    postgresDB('users').where('id', '=', id)
+        .increment('entries', 1)
+        .returning('entries')
+        .then(entries => {
+            res.json(entries[0].entries);
+        })
+        .catch(err => res.status(400).json('unable to get entries'))
 });
 
 app.listen(3001, () => {

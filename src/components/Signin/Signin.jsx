@@ -65,7 +65,6 @@ const Signin = ({ onRouteChange, loadUser }) => {
                 </div>
                 <div className="links-container">
                     <p onClick={() => onRouteChange('register')}>Register</p>
-                    <p >Forgot your password?</p>
                 </div>
             </div>
         </div>
