@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import ParticlesBg from 'particles-bg';
 import Navbar from './components/Navbar/Navbar';
 import Signin from './components/Signin/Signin';
 import Register from './components/Register/Register';
 import Logo from './components/Logo/Logo';
+import Message from './components/Message/Message';
 import Rank from './components/Rank/Rank';
 import ImageInput from './components/ImageInput/ImageInput';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
+import Profile from './components/Profile/Profile';
 import './App.css';
-
-//api stuff
 
 let USER = {
   id:'',
@@ -27,7 +27,14 @@ function App() {
   const [route, setRoute] = useState('signin');
   const [isSignedIn, setisSignedIn] = useState(false);
   const [user, setUser] = useState(USER);
+  const [responseMessage, setResponseMessage] = useState('');
+  const [showMessage, setShowMessage] = useState(false);
+
   
+  const handleUserUpdate = useCallback((newData) => {
+    setUser(newData);
+  }, [setUser])
+
   const loadUser = (userData) => {
     setUser({
       id: userData.id,
@@ -44,37 +51,24 @@ function App() {
 
   const onImageSubmit = () => {
     setImageUrl(input);
-    setInput('');
 
-    const raw = JSON.stringify({
-      "user_app_id": {
-          "user_id": USER_ID,
-          "app_id": APP_ID
-      },
-      "inputs": [
-          {
-              "data": {
-                  "image": {
-                      "url": input
-                  }
-              }
-          }
-      ]
-    });
-
-    const requestOptions = {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Key ' + PAT
-      },
-      body: raw
-    };
-
-    fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
-    .then((response) => response.text())
-    .then((result) => {
-      const { outputs } = JSON.parse(result);
+    fetch('http://localhost:3001/imageurl', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          input: input
+        })
+    })
+    .then(response => {
+      if(response.ok){
+        return response.json()
+      }else {
+        setShowMessage(true)
+        setTimeout(() => setShowMessage(false), 3000);
+        setResponseMessage('No valid URL')
+      }
+      })
+    .then(result => {
       if(result){
         fetch('http://localhost:3001/image', {
           method: 'PUT',
@@ -85,20 +79,24 @@ function App() {
         })
         .then(response => response.json())
         .then(count => {
-          setUser(user => ({...user, entries:count}))
+            setUser(user => ({...user, entries:count}))
         })
+        .catch()
       }
-      displayFaceBox(calculateFaceLocation(outputs));
+      displayFaceBox(calculateFaceLocation(result));
     })
-    .catch((error) => alert('no face', error));
-        
+    .catch((error) => {
+      setShowMessage(true)
+      setTimeout(() => setShowMessage(false), 3000);
+      setResponseMessage('Error')
+    });
   }
  
   const calculateFaceLocation = (outputsData) => {
     const image = document.getElementById('inputImage');
     
     const { regions } = outputsData[0].data; //can map the regions array of objects to show multiple boxes for faces
-    const verticesValues = regions.map(obj => obj.region_info.bounding_box); //values for box multiple faces
+    const verticesValues = regions.map(obj => obj.region_info.bounding_box); //values for boxing multiple faces
 
     const width = Number(image.width);
     const height = Number(image.height);
@@ -115,14 +113,27 @@ function App() {
   }
   
   const displayFaceBox = (boxNumber) => {
+    if(!boxNumber.length) {
+      setShowMessage(true)
+      setTimeout(() => setShowMessage(false), 5000);
+      setResponseMessage('There are no faces in this image, try another one!')
+    }
     setBoxes(boxNumber);
   }
 
   const onRouteChange = (newRoute) => {
-    if(newRoute === 'home'){
-      setisSignedIn(true);
-    } else {
+    if(newRoute === 'signin'){
+      setInput('');
+      setBoxes([]);
+      setImageUrl('');
       setisSignedIn(false);
+      setUser(USER)
+    } else if(newRoute === 'profile'){
+      setBoxes([]);
+      setImageUrl('');
+      setisSignedIn(true);
+    } else if(newRoute === 'home'){
+      setisSignedIn(true);
     }
     setRoute(newRoute);
   }
@@ -136,16 +147,21 @@ function App() {
           <Logo/>
           <Rank name={user.name} entries={user.entries}/>
           <ImageInput
-          onInputChange={onInputChange}
-          onImageSubmit={onImageSubmit}/>
+            onInputChange={onInputChange}
+            onImageSubmit={onImageSubmit}/>
+          <Message type='info' showMessage={showMessage} responseMessage={responseMessage}/>
           <FaceRecognition imageUrl={imageUrl} boxes={boxes}/>
-      </>
-      : (
-        route === 'signin'
+        </>
+      : route === 'profile'
+      ? <>
+          <Profile
+            handleUserUpdate={handleUserUpdate}
+            onRouteChange={onRouteChange} 
+            id={user.id}/>
+        </>
+      :  route === 'signin'
         ? <Signin loadUser={loadUser} onRouteChange={onRouteChange}/>
         : <Register loadUser={loadUser} onRouteChange={onRouteChange}/>
-      )
-      
       }
     </div>
   );

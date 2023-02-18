@@ -1,0 +1,35 @@
+.message-wrapper{
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.message-error {
+    color: #bd1111;
+    font-size: 25px;
+    padding: 1rem;
+    background-color: #00000096;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 40rem;
+}
+
+.message-success {
+    color: #11bd28;
+    font-size: 25px;
+    padding: 1rem;
+    background-color: #00000096;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 40rem;
+}
+
+.message-info {
+    color: #bd8411;
+    font-size: 25px;
+    padding: 1rem;
+    background-color: #00000096;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 40rem;
+}

@@ -5,7 +5,8 @@ const Navbar = ({ onRouteChange, isSignedIn }) => {
   if(isSignedIn) {
     return (
       <nav className='navbar-container'>
-          <p onClick={() => onRouteChange('signin')} className='signout'>Profile</p>
+          <p onClick={() => onRouteChange('home')} className='signout'>Home</p>
+          <p onClick={() => onRouteChange('profile')} className='signout'>Profile</p>
           <p onClick={() => onRouteChange('signin')} className='signout'>Sign Out</p>
       </nav>
     );
