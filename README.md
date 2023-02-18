@@ -9,3 +9,5 @@ Face recognition app
 -Created databes - done
 
 -Connected server to database - done
+
+-Some quality of life changes - done
