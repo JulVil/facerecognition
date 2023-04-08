@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Logo from '../Logo/Logo';
 import Message from '../Message/Message';
-import './Profile.css'
+import './Profile.css';
 
 const Profile = ({ id, handleUserUpdate, onRouteChange }) => {
   const [showMessage, setShowMessage] = useState(false);
@@ -14,158 +14,155 @@ const Profile = ({ id, handleUserUpdate, onRouteChange }) => {
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
-    fetch(`http://localhost:3001/profile/${id}`)
-    .then(response => response.json())
-    .then(data => {
-      setUserData(data)
-    });
+    fetch(`https://smartbrain-9xn8.onrender.com/profile/${id}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setUserData(data);
+      });
   }, [id]);
-  
+
   let formattedDate = '';
-    if(userData.joined)
-      formattedDate = userData.joined.substring(0,10);
-  
-  const onNameUpdate = (event) =>{
-    setUpdateName(event.target.value);
-  }
-
-  const onEmailUpdate = (event) =>{
-    setUpdateEmail(event.target.value);
-  }
-
-  const onHashUpdate = (event) =>{
-    setUpdateHash(event.target.value);
-  }
-
-  const handleUpdateProfileCard = () => {
-    setUpdateCard(true);
-  }
-
-  const handleDeleteProfileCard = () => {
-    setDeleteCard(true);
-  }
+  if (userData.joined) formattedDate = userData.joined.substring(0, 10);
 
   const onCancelUpdate = () => {
-    setUpdateCard(false)
-    setUpdateName('')
-    setUpdateEmail('')
-    setUpdateHash('')
-  }
+    setUpdateCard(false);
+    setUpdateName('');
+    setUpdateEmail('');
+    setUpdateHash('');
+  };
 
   const onSubmitUpdate = (field, value) => {
-    if(field === 'name'){
-      setShowMessage(true)
+    if (field === 'name') {
+      setShowMessage(true);
       setTimeout(() => setShowMessage(false), 3000);
-      setResponseMessage('Name updated!')
-      setUpdateName('')
-    }else if(field === 'email'){
-      setUpdateEmail('')
-      setShowMessage(true)
+      setResponseMessage('Name updated!');
+      setUpdateName('');
+    } else if (field === 'email') {
+      setUpdateEmail('');
+      setShowMessage(true);
       setTimeout(() => setShowMessage(false), 3000);
-      setResponseMessage('Email updated!')
-    }else {
-      setShowMessage(true)
+      setResponseMessage('Email updated!');
+    } else {
+      setShowMessage(true);
       setTimeout(() => setShowMessage(false), 3000);
-      setResponseMessage('Password updated!')
-      setUpdateHash('')
+      setResponseMessage('Password updated!');
+      setUpdateHash('');
     }
 
-    fetch(`http://localhost:3001/updateProfile/${id}`, {
+    fetch(`https://smartbrain-9xn8.onrender.com/updateProfile/${id}`, {
       method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({[field]: value})
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: value }),
     })
-    .then(response => response.json())
-    .then(newUserData => {
-      console.log(newUserData)
-      setUserData(newUserData)
-      handleUserUpdate(newUserData)
-    })
-    .catch(console.log);
-  }
+      .then((response) => response.json())
+      .then((newUserData) => {
+        console.log(newUserData);
+        setUserData(newUserData);
+        handleUserUpdate(newUserData);
+      })
+      .catch(console.log);
+  };
 
   const onSubmitDelete = () => {
     setUpdateCard(false);
     setDeleteCard(false);
     onRouteChange('signin');
 
-    fetch(`http://localhost:3001/deleteProfile/${id}`, {
+    fetch(`https://smartbrain-9xn8.onrender.com/deleteProfile/${id}`, {
       method: 'DELETE',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: userData.email
+        email: userData.email,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log(result);
       })
-    })
-    .then(response => response.json())
-    .then(result => {
-      console.log(result);
-    })
-    .catch(console.log)
-  }
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <div>
-      <Logo/>
-      <div className="profile-wrapper">
+      <Logo />
+      <div className='profile-wrapper'>
         <div className='main-wrapper'>
           {updateCard ? (
             <div className='profile-border'>
               <h1>This is your profile</h1>
-                <div className='user-container'>
-                  <label htmlFor='update-container'>Name:</label>
-                  <div className='field-container'>
-                    <input 
-                      className='update-container' 
-                      type='text' 
-                      placeholder={userData.name}
-                      onChange={onNameUpdate} required/>
-                    <button
-                      disabled={!updateName} 
-                      onClick={() => onSubmitUpdate('name', updateName)}>Update</button>
-                  </div>
-                  <label htmlFor='update-container'>Email:</label>
-                  <div className='field-container'>
-                  <input 
-                    className='update-container' 
-                    type='email' 
+              <div className='user-container'>
+                <label htmlFor='update-container'>Name:</label>
+                <div className='field-container'>
+                  <input
+                    className='update-container'
+                    type='text'
+                    placeholder={userData.name}
+                    onChange={(event) => setUpdateName(event.target.value)}
+                    required
+                  />
+                  <button
+                    disabled={!updateName}
+                    onClick={() => onSubmitUpdate('name', updateName)}>
+                    Update
+                  </button>
+                </div>
+                <label htmlFor='update-container'>Email:</label>
+                <div className='field-container'>
+                  <input
+                    className='update-container'
+                    type='email'
                     placeholder={userData.email}
-                    onChange={onEmailUpdate} required/>
-                    <button
-                      disabled={!updateEmail} 
-                      onClick={() => onSubmitUpdate('email', updateEmail)}>Update</button>
-                  </div>
-                  <label htmlFor='update-container'>Password:</label>
-                  <div className='field-container'>
-                  <input 
-                    className='update-container' 
-                    type='password' 
+                    onChange={(event) => setUpdateEmail(event.target.value)}
+                    required
+                  />
+                  <button
+                    disabled={!updateEmail}
+                    onClick={() => onSubmitUpdate('email', updateEmail)}>
+                    Update
+                  </button>
+                </div>
+                <label htmlFor='update-container'>Password:</label>
+                <div className='field-container'>
+                  <input
+                    className='update-container'
+                    type='password'
                     placeholder='New Password'
-                    onChange={onHashUpdate} required/>
-                    <button
-                      disabled={!updateHash} 
-                      onClick={() => onSubmitUpdate('password', updateHash)}>Update</button>
+                    onChange={(event) => setUpdateHash(event.target.value)}
+                    required
+                  />
+                  <button
+                    disabled={!updateHash}
+                    onClick={() => onSubmitUpdate('password', updateHash)}>
+                    Update
+                  </button>
                 </div>
-                </div>
-                <div className='button-container'>
-                  <button 
-                    className='profile-button'
-                    onClick={onCancelUpdate}>Cancel</button>
-                </div>
+              </div>
+              <div className='button-container'>
+                <button className='profile-button' onClick={onCancelUpdate}>
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : deleteCard ? (
             <div className='profile-border'>
               <h1>
                 Are you sure you want to delete your profile?
-                <br/>
+                <br />
                 All data will be lost.
               </h1>
               <div className='button-container'>
-                <button 
+                <button
                   className='profile-button'
-                  onClick={() => onSubmitDelete()}>Delete</button>
-                <button 
+                  onClick={() => onSubmitDelete()}>
+                  Delete
+                </button>
+                <button
                   className='profile-button'
-                  onClick={() => setDeleteCard(false)}>Cancel</button>
+                  onClick={() => setDeleteCard(false)}>
+                  Cancel
+                </button>
               </div>
             </div>
           ) : (
@@ -178,23 +175,31 @@ const Profile = ({ id, handleUserUpdate, onRouteChange }) => {
                 <div className='info-container'>{userData.email}</div>
                 Entries:
                 <div className='info-container'>{userData.entries}</div>
-                Joined in: 
+                Joined in:
                 <div className='info-container'>{formattedDate}</div>
               </div>
               <div className='button-container'>
-                <button 
-                  className='profile-button' 
-                  onClick={() => handleUpdateProfileCard()}>Update</button>
-                <button 
+                <button
                   className='profile-button'
-                  onClick={() => handleDeleteProfileCard()}>Delete</button>
+                  onClick={() => setUpdateCard(true)}>
+                  Update
+                </button>
+                <button
+                  className='profile-button'
+                  onClick={() => setDeleteCard(true)}>
+                  Delete
+                </button>
               </div>
             </div>
           )}
         </div>
-          <Message type='success' showMessage={showMessage} responseMessage={responseMessage}/>
+        <Message
+          type='error'
+          showMessage={showMessage}
+          responseMessage={responseMessage}
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 export default Profile;

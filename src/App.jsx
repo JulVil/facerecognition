@@ -30,11 +30,10 @@ function App() {
   const [responseMessage, setResponseMessage] = useState('');
   const [showMessage, setShowMessage] = useState(false);
 
-  
   const handleUserUpdate = useCallback((newData) => {
     setUser(newData);
   }, [setUser])
-
+  
   const loadUser = (userData) => {
     setUser({
       id: userData.id,
@@ -52,25 +51,17 @@ function App() {
   const onImageSubmit = () => {
     setImageUrl(input);
 
-    fetch('http://localhost:3001/imageurl', {
+    fetch('https://smartbrain-9xn8.onrender.com/imageurl', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           input: input
         })
     })
-    .then(response => {
-      if(response.ok){
-        return response.json()
-      }else {
-        setShowMessage(true)
-        setTimeout(() => setShowMessage(false), 3000);
-        setResponseMessage('No valid URL')
-      }
-      })
+    .then(response => response.json())
     .then(result => {
-      if(result){
-        fetch('http://localhost:3001/image', {
+      if(result !== 'error'){
+        fetch('https://smartbrain-9xn8.onrender.com/image', {
           method: 'PUT',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
@@ -88,7 +79,8 @@ function App() {
     .catch((error) => {
       setShowMessage(true)
       setTimeout(() => setShowMessage(false), 3000);
-      setResponseMessage('Error')
+      setResponseMessage('No valid URL')
+      console.log(error)
     });
   }
  
@@ -156,7 +148,7 @@ function App() {
       ? <>
           <Profile
             handleUserUpdate={handleUserUpdate}
-            onRouteChange={onRouteChange} 
+            onRouteChange={onRouteChange}
             id={user.id}/>
         </>
       :  route === 'signin'
