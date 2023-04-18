@@ -28,6 +28,14 @@
     box-shadow: 4px 4px 8px 0px rgba(255, 255, 255, 0.2); 
 }
 
+@media only screen and (max-width: 520px){
+  .background-container {
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}
+
 .url-input {
     width: 70%;
     font-size: 1.25rem;
@@ -55,4 +63,11 @@
 
 .detect-button:active {
     transform: translateZ(5px);
+}
+
+@media only screen and (min-width: 300px){
+    .detect-button{
+        font-size: 1rem;
+        width: 50%;
+    }
 }

@@ -1,25 +1,31 @@
-.result-container{
-    display: flex;
-    justify-content: center;
-    margin: 0;
+.result-container {
+  display: flex;
+  justify-content: center;
+  margin: 0;
 }
 
-.image-container{
-    position: relative;
-    margin-top: 2rem;
-    margin-bottom: 3rem;
+.image-container {
+  position: relative;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
 }
 
 .image-container img {
-    width: 500px;
-    height: auto;
+  width: 500px;
+  height: auto;
+}
+
+@media only screen and (max-width: 530px) {
+  .image-container img {
+    width: 300px;
+  }
 }
 
 .bounding-box {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    position: absolute;
-    cursor: pointer;
-    border: 3px solid #5ae832;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: absolute;
+  cursor: pointer;
+  border: 3px solid #5ae832;
 }
